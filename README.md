@@ -18,4 +18,4 @@
 **Tough Questions**
 
 7. Which routes have overall maximum delays, across the entire year?
-8. Can we predict if a flight will be cancelled? (Using mllib and building a predictive model)
+8. Can we predict if a flight will be cancelled? (Using pyspark.ml and building a predictive model)
