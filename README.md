@@ -1,4 +1,4 @@
-# flightAnalysis
+# Flight Data Analysis using PySpark and Zeppelin
 
 ## Queries
 
