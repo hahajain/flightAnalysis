@@ -19,8 +19,8 @@ df1.groupBy("CARRIER").agg(F.count("TOTAL_DELAY").alias("Count"))
 #4
 df.createOrReplaceTempView("AIRLINECOUNTS")
 df2 = spark.sql("SELECT CARRIER, count(CARRIER) as Operated_flights FROM AIRLINECOUNTS group by CARRIER");
-df3=df2.agg(F.max("Operated_flights").alias(‘’cnt”))
-df2.join(df3, df3.cnt==df2.Operated_flights).drop(“cnt”).show()
+df3=df2.agg(F.max("Operated_flights").alias("cnt"))
+df2.join(df3, df3.cnt==df2.Operated_flights).drop("cnt").show()
 
 #5
 df = df.withColumn('ROUTE', F.concat(F.col("ORIGIN"), F.lit("-"), F.col("DEST")))
