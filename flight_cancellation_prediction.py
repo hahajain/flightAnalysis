@@ -47,7 +47,7 @@ predictions_lr = lrModel.transform(test)
 # Evaluating accuracy
 from pyspark.ml.evaluation import BinaryClassificationEvaluator
 evaluator = BinaryClassificationEvaluator().setLabelCol("CANCELLED")
-evaluator.evaluate(predictions_lr)
+accuracy_lr = evaluator.evaluate(predictions_lr)
 # 0.68863895345779458
 
 # Decision Tree
@@ -70,7 +70,7 @@ from pyspark.ml.classification import NaiveBayes
 nb = NaiveBayes(smoothing = 1.0, modelType = "multinomial", featuresCol = "features", labelCol = "CANCELLED")
 nbModel = nb.fit(train)
 predictions_nb = nbModel.transform(test)
-evaluator.evaluate(predictions_nb)
+accuracy_nb = evaluator.evaluate(predictions_nb)
 # 0.59431219823991344
 
 # SVM - tried but didn't work
@@ -78,4 +78,17 @@ from pyspark.ml.classification import LinearSVC
 lsvc = LinearSVC(maxIter=10, regParam=0.1, featuresCol = ‘features’, labelCol = ‘CANCELLED’)
 lsvcModel = lsvc.fit(train)
 predictions_svm = lsvcModel.transform(test)
-evaluator.evaluate(predictions_svm)
+accuracy_svm = evaluator.evaluate(predictions_svm)
+
+# Plotting accuracies for all models
+import matplotlib.pyplot as plt
+A = ['Logistic Regression','Decision Tree','Random Forest','Naive Bayes']
+B = [accuracy_lr, accuracy_dt, accuracy_rf, accuracy_nb]
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+plt.scatter(A, B)
+axes = plt.gca()
+axes.set_ylim([0,100])
+
+plt.show()
