@@ -29,8 +29,8 @@ df3=df2.agg(F.max("Cancelled_count").alias("cnt"))
 df2.join(df3, df3.cnt==df2.Cancelled_count).drop("cnt").show()
 
 #6     
-a=df.groupBy("CARRIER").agg(F.sum("CANCELLED").alias("Count"))    
-b=df.groupBy("CARRIER").agg(F.count("CANCELLLED").alias("Total"))
+df1=df.groupBy("CARRIER").agg(F.sum("CANCELLED").alias("Count"))    
+df2=df.groupBy("CARRIER").count().alias("Total")
 df1.alias('a').join(df2.alias('b'),F.col('b.CARRIER') == F.col('a.CARRIER')).select(F.col('a.CARRIER'),(F.col('a.Count')/F.col('b.Total'))).show()    
 
 #7
