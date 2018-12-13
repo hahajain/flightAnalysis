@@ -1,6 +1,3 @@
-
-
-
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 df = spark.read.format("csv").option("header","true").option("mode","DROPMALFORMED").load("all_flights.csv")
@@ -8,89 +5,48 @@ df = df.withColumn("Route", F.concat(F.col("ORIGIN"),F.lit('-'), F.col("DEST")))
 
 val df = spark.read.format("csv").option("header","true").option("mode","DROPMALFORMED").load("all_flights.csv")
 
+#1
+df.agg(F.min("DISTANCE"), F.max("DISTANCE")).collect()
 
-Easy Questions
-1. Longest,shortest distance flight?
-    from pyspark.sql import functions as F
-    df.agg(F.min("DISTANCE"), F.max("DISTANCE")).collect()
-    [Row(min(DISTANCE)=25.0, max(DISTANCE)=4983.0)]
-
-
-2. Dates with maximum number of flights?                                                                        df.groupBy('FL_DATE').count().orderBy('count', ascending = False).show()    
-
-Thought_vishesh: Nothing really interesting or insightful, most number of flights in July.    
-
+#2
+df.groupBy('FL_DATE').count().orderBy('count', ascending = False).show()    
                                                     
-3. Flights with most delays?
-
+#3
 df = df.withColumn(“TOTAL_DELAY”, F.col(“ARR_DELAY”) - F.col(“DEP_DELAY”))    
 df1=df.where(F.col("TOTAL_DELAY")>0)
 df1.groupBy("CARRIER").agg(F.count("TOTAL_DELAY").alias("Count"))
 
-
-
-
-
-
-
-4. Which carrier operated most number of flights in 2016?    
-
- df.createOrReplaceTempView("AIRLINECOUNTS")
+#4
+df.createOrReplaceTempView("AIRLINECOUNTS")
 df2 = spark.sql("SELECT CARRIER, count(CARRIER) as Operated_flights FROM AIRLINECOUNTS group by CARRIER");
 df3=df2.agg(F.max("Operated_flights").alias(‘’cnt”))
 df2.join(df3, df3.cnt==df2.Operated_flights).drop(“cnt”).show()
 
-+-------+----------------+                                                      
-|CARRIER|Operated_flights|
-+-------+----------------+
-| WN|         1299444|
-+-------+----------------+            
-Medium Questions                                                                                                1. Which route has the most cancelled flights?
-
+#5
 df = df.withColumn('ROUTE', F.concat(F.col("ORIGIN"), F.lit("-"), F.col("DEST")))
-
 df2=df.where(F.col("CANCELLED")==1).groupBy("ROUTE").agg(F.count("CANCELLED").alias("Cancelled_count"))
-df3=df2.agg(F.max("Cancelled_count").alias(‘’cnt”))
-df2.join(df3, df3.cnt==df2.Cancelled_count).drop(“cnt”).show()
+df3=df2.agg(F.max("Cancelled_count").alias("cnt"))
+df2.join(df3, df3.cnt==df2.Cancelled_count).drop("cnt").show()
 
-+-------+---------------+                                                       
-|CARRIER|Cancelled_count|
-+-------+---------------+
-|     WN|          15866|
-+-------+---------------+
-
-
-
-2. Max cancelled carrier?    
-df.groupBy("CARRIER").agg(F.sum("CANCELLED").alias("Count")).agg(F.max("Count")).show()    
-Note: This gives only the count of maximum cancelled carrier.                
-
-Thought_hahajain : Finding a max cancelled carrier doesn't make sense to me. What if a carrier runs 1k flights and cancels 10, while the other one only runs 10 and cancels 1. Ratio of cancelled flights run looks good and can be a medium difficulty level question.                                            
-Vishesh: Agreed, ratio/percentage makes more sense
-
-a=df.groupBy("CARRIER").agg(F.count("TOTAL_DELAY").alias("Count"))
-b=
-
+#6     
+a=df.groupBy("CARRIER").agg(F.sum("CANCELLED").alias("Count"))    
+b=df.groupBy("CARRIER").agg(F.count("CANCELLLED").alias("Total"))
 df1.alias('a').join(df2.alias('b'),F.col('b.CARRIER') == F.col('a.CARRIER')).select(F.col('a.CARRIER'),(F.col('a.Count')/F.col('b.Total'))).show()    
 
-                                                                                                        
-
-Tough Questions                                                                                                
-1.Predict which flight will be cancelled? Build a model by splitting the data into train, test and validation. Use model to predict on unseen data. Get unseen data from the same link for a different year (2017 for example).                                                                                
-2.Which `routes` have maximum "delays"? where, `route` = concatenate(departure_airport_id, arrival_airport_id), "delay" = arrival delay - departure delay
-
-# Add column for 'TOTAL_DELAY'
+#7
 from pyspark.sql.functions import col
 new_df = df_new.withColumn("TOTAL_DELAY", col("ARR_DELAY) - col("DEP_DELAY"))
 
-# Add column "ROUTE" by concatenating "ORIGIN" and "DEST"
+#Add column "ROUTE" by concatenating "ORIGIN" and "DEST"
 from pyspark.sql import functions as sf
 new_df = new_df.withColumn('ROUTE', sf.concat(sf.col("ORIGIN"), sf.lit("-"), sf.col("DEST")))
 
-# Groupby "ROUTE" and aggregate on sum of "TOTAL_DELAY"
+#Groupby "ROUTE" and aggregate on sum of "TOTAL_DELAY"
 new_df1 = new_df.groupBy("ROUTE").agg(sf.col("ROUTE"), sf.sum("TOTAL_DELAY"))
 
-# Get max delays by sorting this new dataframe
+#Get max delays by sorting this new dataframe
 new_df1.orderBy('sum(TOTAL_DELAY)', ascending = False).show()
+
+#8
 
 
