@@ -12,9 +12,12 @@ df.agg(F.min("DISTANCE"), F.max("DISTANCE")).collect()
 df.groupBy('FL_DATE').count().orderBy('count', ascending = False).show()    
                                                     
 #3
-df = df.withColumn(“TOTAL_DELAY”, F.col(“ARR_DELAY”) - F.col(“DEP_DELAY”))    
+df = df.withColumn("TOTAL_DELAY", F.col("ARR_DELAY") - F.col("DEP_DELAY"))    
 df1=df.where(F.col("TOTAL_DELAY")>0)
-df1.groupBy("CARRIER").agg(F.count("TOTAL_DELAY").alias("Count"))
+df2=df1.groupBy("CARRIER").agg(F.count("TOTAL_DELAY").alias("Count"))
+df3=df2.agg(F.max("Count").alias("cnt"))
+df2.join(df3, df3.cnt==df2.Count).drop("cnt").show()
+
 
 #4
 df.createOrReplaceTempView("AIRLINECOUNTS")
@@ -29,9 +32,11 @@ df3=df2.agg(F.max("Cancelled_count").alias("cnt"))
 df2.join(df3, df3.cnt==df2.Cancelled_count).drop("cnt").show()
 
 #6     
-df1=df.groupBy("CARRIER").agg(F.sum("CANCELLED").alias("Count"))    
-df2=df.groupBy("CARRIER").count().alias("Total")
-df1.alias('a').join(df2.alias('b'),F.col('b.CARRIER') == F.col('a.CARRIER')).select(F.col('a.CARRIER'),(F.col('a.Count')/F.col('b.Total'))).show()    
+df1=df.where(F.col("CANCELLED")==1).groupBy("CARRIER").agg(F.count("CANCELLED").alias("Count"))   
+df2=df.groupBy("CARRIER").agg(F.count("CANCELLED").alias("Total"))
+df3=df1.alias('a').join(df2.alias('b'),F.col('b.CARRIER') == F.col('a.CARRIER')).select(F.col('a.CARRIER'),(F.col('a.Count')/F.col('b.Total')).alias("Ratio"))    
+df4=df3.agg(F.max("Ratio").alias("cnt"))
+df3.join(df4, df4.cnt==df3.Ratio).drop("cnt").show()
 
 #7
 from pyspark.sql.functions import col
