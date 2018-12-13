@@ -47,6 +47,4 @@ new_df1 = new_df.groupBy("ROUTE").agg(sf.col("ROUTE"), sf.sum("TOTAL_DELAY"))
 #Get max delays by sorting this new dataframe
 new_df1.orderBy('sum(TOTAL_DELAY)', ascending = False).show()
 
-#8
-
 
