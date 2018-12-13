@@ -4,11 +4,13 @@ from pyspark.ml import Pipeline
 categoricalColumns = ["UNIQUE_CARRIER", "ORIGIN", "DEST"]
 numericalColumns = ["DISTANCE"]
 
+# Convert string categorical columns to indexed integers
 indexers = [
 	StringIndexer(inputCol=c, outputCol ="{0}_indexed".format(c))
 	for c in categoricalColumns
 ]
 
+# OneHot Encoding
 encoders = [
 	OneHotEncoder(
 		inputCol=indexer.getOutputCol(),
